@@ -601,6 +601,12 @@ class KnowledgeBase:
 
     def should_update_index(self):
         """判断是否需要更新索引（只读模式下永远返回False）"""
+        import os
+        if os.environ.get("CLOUD_MODE", "false") == "true":
+           print("☁️ 云端模式，跳过索引更新检查")
+           return False
+        
+        
         if self.readonly:
             print("⚠️ 只读模式，跳过索引更新检查")
             return False
