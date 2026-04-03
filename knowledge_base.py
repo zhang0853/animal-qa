@@ -12,6 +12,7 @@ import requests
 import warnings
 import logging
 import random
+import streamlit as st
 from typing import List, Dict, Any, Optional, Generator
 from datetime import datetime
 
@@ -60,12 +61,38 @@ EXPORT_DIR = os.path.join(BASE_DIR, "导出问答")
 READONLY_MODE = os.environ.get("KB_READONLY", "true").lower() == "true"
 print(f"📚 知识库模式: {'只读' if READONLY_MODE else '可写'}")
 
+# ========== API 密钥配置（安全方式）==========
+def get_api_key(key_name: str, default: str = None) -> str:
+    """
+    获取 API 密钥
+    优先级：Streamlit Secrets > 环境变量 > 默认值
+    """
+    # 优先从 Streamlit secrets 读取
+    try:
+        value = st.secrets[key_name]
+        if value:
+            return value
+    except:
+        pass
+    
+    # 其次从系统环境变量读取
+    value = os.environ.get(key_name)
+    if value:
+        return value
+    
+    # 最后使用默认值（仅用于本地测试）
+    if default:
+        print(f"⚠️ 警告：使用默认 {key_name}，请在生产环境设置密钥")
+        return default
+    else:
+        raise ValueError(f"未找到 API 密钥：{key_name}")
+
 # 博查API配置
-BOCHA_API_KEY = "sk-cbb1f9c3978c44e095a3f5744a39c277"
+BOCHA_API_KEY = get_api_key("BOCHA_API_KEY", "sk-cbb1f9c3978c44e095a3f5744a39c277")
 BOCHA_API_URL = "https://api.bochaai.com/v1/web-search"
 
 # DeepSeek API配置
-DEEPSEEK_API_KEY = "sk-3f04135d9ffb4636985c3796b6562df0"
+DEEPSEEK_API_KEY = get_api_key("DEEPSEEK_API_KEY", "sk-3f04135d9ffb4636985c3796b6562df0")
 DEEPSEEK_API_BASE = "https://api.deepseek.com/v1"
 
 # 支持的文件格式
